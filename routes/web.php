@@ -22,11 +22,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
-    })->middleware(['auth', 'verified'])->name('dashboard');
+    })->name('dashboard');
 
+});
+
+Route::middleware('auth', 'role:admin')->group(function (){
     Route::get('/users', function(){
         return Inertia::render('Users/Index');
-    })->middleware(['auth', 'verified'])->name('user');
+    })->name('user');
 });
 
 require __DIR__.'/auth.php';

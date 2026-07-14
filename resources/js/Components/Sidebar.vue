@@ -1,24 +1,31 @@
 <script setup>
+import { computed } from "vue"
 import { Link, usePage } from "@inertiajs/vue3";
 import {
   LayoutDashboard,
   Users,
   ListOrdered,
   Settings,
+  LogOut,
 } from "lucide-vue-next";
 
 const page = usePage();
+
+const user = computed(() => page.props.auth.user);
+const roles = computed(() => page.props.auth.roles);
 
 const menus = [
   {
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+    roles: ["admin", "petugas"],
   },
   {
     name: "Users",
     href: "/users",
     icon: Users,
+    roles: ["admin"],
   },
   {
     name: "Antrean",
@@ -69,7 +76,10 @@ const menus = [
 
 
         <Link
-            v-for="menu in menus"
+            v-for="menu in menus.filter(menu =>
+                !menu.roles ||
+                menu.roles.some(role => roles.includes(role))
+            )"
             :key="menu.href"
             :href="menu.href"
 
