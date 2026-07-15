@@ -3,19 +3,20 @@ import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
+    user: Object,
     roles: Array,
 });
 
 const form = useForm({
-    name: "",
-    username: "",
-    email: "",
+    name: props.user.name,
+    username: props.user.username,
+    email: props.user.email,
     password: "",
-    role: "",
+    role: props.user.roles[0]?.name ?? "",
 });
 
 const submit = () => {
-    form.post(route("users.store"));
+    form.put(route("users.update", props.user.id));
 };
 </script>
 
@@ -146,12 +147,12 @@ const submit = () => {
                                 Pilih Role
                             </option>
 
-                            <option
-                                v-for="role in roles"
-                                :key="role.id"
-                                :value="role.name"
-                            >
-                                {{ role.name }}
+                            <option value="admin">
+                                Admin
+                            </option>
+
+                            <option value="petugas">
+                                Petugas
                             </option>
                         </select>
 

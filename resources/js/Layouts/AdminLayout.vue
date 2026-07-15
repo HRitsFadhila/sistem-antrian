@@ -1,4 +1,34 @@
 <script setup>
+import { watch } from "vue";
+import { usePage } from "@inertiajs/vue3";
+import { toast, Toaster } from "vue-sonner";
+
+const page = usePage();
+
+watch(
+    () => page.props.flash?.success,
+    (success) => {
+        if (success) {
+            toast.success(success);
+        }
+    },
+    {
+        immediate: true,
+    }
+);
+
+watch(
+    () => page.props.flash?.error,
+    (error) => {
+        if (error) {
+            toast.error(error);
+        }
+    },
+    {
+        immediate: true,
+    }
+);
+
 import Sidebar from "@/Components/Sidebar.vue";
 import Navbar from "@/Components/Navbar.vue";
 </script>
@@ -14,5 +44,10 @@ import Navbar from "@/Components/Navbar.vue";
         <slot />
       </main>
     </div>
-  </div>
+    </div>
+    <Toaster
+        position="top-right"
+        richColors
+        closeButton
+    />
 </template>

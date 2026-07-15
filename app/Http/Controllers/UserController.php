@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -39,7 +40,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Users/Create');
+        return Inertia::render('Users/Create', [
+            'roles' => Role::select('id', 'name')->get(),
+        ]);
     }
 
     /**
@@ -80,17 +83,74 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(User $user)
     {
-        //
+        $user->load('roles');
+
+        return Inertia::render('Users/Edit',[
+            'user' => $user,
+            'roles' => Role::all(),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'username' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:users,username,' . $user->id
+            ],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users,email,' . $user->id
+            ],
+            'password' => [
+                'nullable',
+                'min:8'
+            ],
+            'role' => [
+                'required',
+                'exists:roles,name'
+            ],
+        ]);
+
+        $user->update([
+            'name' => $validated['name'],
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+        ]);
+
+        if($request->filled('password')){
+            $user->update([
+                'password'=>Hash::make(
+                    $validated['password']
+                )
+            ]);
+        }
+
+        $user->syncRoles(
+            $validated['role']
+        );
+
+        return redirect()
+            ->route('users.index')
+            ->with(
+                'success',
+                'User berhasil diperbarui'
+            );
     }
 
     /**

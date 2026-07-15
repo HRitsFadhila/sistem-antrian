@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@vueuse/core": "^14.3.0",
-        "lucide-vue-next": "^1.0.0"
+        "lucide-vue-next": "^1.0.0",
+        "vue-sonner": "^2.0.9"
     }
 }
