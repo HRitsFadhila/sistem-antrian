@@ -7,43 +7,41 @@ import { watchDebounced } from "@vueuse/core";
 import { router } from "@inertiajs/vue3";
 import { Pencil, Trash2 } from "lucide-vue-next";
 import TableToolbar from "@/Components/Table/TableToolbar.vue";
-import SearchInput from "@/Components/Table/SearchInput.vue";
 
 // TAMBAHKAN IMPORT INI
 import DataTable from "@/Components/Table/DataTable.vue";
 
 const props = defineProps({
-    users: Object
+    polis: Object
 });
 
 const search = ref(props.filters?.search ?? "");
 
 const tableColumns = [
     { label: 'Nama', key: 'name' },
-    { label: 'Username', key: 'username' },
-    { label: 'Email', key: 'email' },
-    { label: 'Role', key: 'role' },
+    { label: 'Prefix', key: 'prefix' },
+    { label: 'Status', key: 'status' },
     { label: 'Aksi', key: 'action', class: 'text-center' }
 ];
 
 const showDeleteModal = ref(false);
-const selectedUser = ref(null);
+const selectedPoli = ref(null);
 
-const confirmDelete = (user) => {
-    selectedUser.value = user;
+const confirmDelete = (poli) => {
+    selectedPoli.value = poli;
     showDeleteModal.value = true;
 };
 
 const closeModal = () => {
     showDeleteModal.value = false;
-    selectedUser.value = null;
+    selectedPoli.value = null;
 };
 
 watchDebounced(
     search,
     (value) => {
         router.get(
-            "/users",
+            "/polis",
             { search: value },
             {
                 preserveState: true,
@@ -58,7 +56,7 @@ watchDebounced(
 );
 
 const deleteUser = () => {
-    router.delete(route("users.destroy", selectedUser.value.id), {
+    router.delete(route("polis.destroy", selectedPoli.value.id), {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
@@ -72,64 +70,38 @@ const deleteUser = () => {
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-3xl font-bold text-slate-800">
-                    Data User
+                    Data Tabel Poli
                 </h1>
                 <p class="text-slate-500 mt-1">
-                    Kelola akun administrator dan petugas.
+                    Kelola Poli.
                 </p>
             </div>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200">
             <TableToolbar>
-                 <template #left>
+                <!-- <template #left>
                     <SearchInput
                         v-model="search"
                         placeholder="Cari user..."
                     />
-                </template>
+                </template> -->
 
                 <template #right>
                     <Link
-                        :href="route('users.create')"
+                        :href="route('polis.create')"
                         class="bg-blue-600 text-white px-4 py-2 rounded-lg"
                     >
-                        Tambah User
+                        Tambah Poli
                     </Link>
                 </template>
             </TableToolbar>
 
             <DataTable
-                :resource="users"
+                :resource="polis"
                 :columns="tableColumns"
-                emptyMessage="Belum ada data user."
+                emptyMessage="Belum ada data Poli."
             >
-                <template #cell-name="{ item }">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
-                            {{ item.name.charAt(0) }}
-                        </div>
-                        <div>
-                            <p class="font-semibold text-slate-800">
-                                {{ item.name }}
-                            </p>
-                        </div>
-                    </div>
-                </template>
-
-                <template #cell-role="{ item }">
-                    <span
-                        class="px-3 py-1 rounded-full text-xs font-semibold"
-                        :class="
-                            item.roles[0]?.name === 'admin'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-green-100 text-green-700'
-                        "
-                    >
-                        {{ item.roles[0]?.name }}
-                    </span>
-                </template>
-
                 <template #cell-action="{ item }">
                     <div class="flex justify-center gap-2">
                         <Link
@@ -152,8 +124,8 @@ const deleteUser = () => {
 
     <ConfirmModal
         :show="showDeleteModal"
-        title="Hapus User"
-        :message="`Apakah yakin ingin menghapus ${selectedUser?.name}?`"
+        title="Hapus Poli"
+        :message="`Apakah yakin ingin menghapus ${selectedPoli?.name}?`"
         @close="closeModal"
         @confirm="deleteUser"
     />

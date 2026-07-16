@@ -28,9 +28,10 @@ const menus = [
     roles: ["admin"],
   },
   {
-    name: "Antrean",
-    href: "/queue",
+    name: "Poli",
+    href: "/polis",
     icon: ListOrdered,
+    roles: ["admin"],
   },
   {
     name: "Settings",
