@@ -41,7 +41,19 @@ class PoliController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+        'nama' => 'required|string|max:255',
+        'prefix' => 'required|string|max:5',
+        'status' => 'required|boolean',
+        ]);
+
+        Poli::create([
+            'nama' => $request->nama,
+            'prefix' => $request->prefix,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('polis.index');
     }
 
     /**
@@ -55,24 +67,38 @@ class PoliController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Poli $poli)
     {
-        //
+        return Inertia::render('Poli/Edit',[
+            'polis' => $poli,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Poli $poli)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'prefix' => 'required|string|max:5',
+            'status' => 'required|boolean',
+        ]);
+
+        $poli->update($validated);
+
+        return redirect()->route('polis.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Poli $poli)
     {
-        //
+        $poli->delete();
+
+        return redirect()
+            ->route('polis.index')
+            ->with('success', 'Poli berhasil dihapus.');
     }
 }

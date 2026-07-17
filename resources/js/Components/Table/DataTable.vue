@@ -17,7 +17,7 @@ defineProps({
 
 <template>
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full text-left border-collapse">
             <thead class="bg-slate-50">
                 <tr lass="text-left text-slate-600">
                     <th class="px-6 py-4">No</th>

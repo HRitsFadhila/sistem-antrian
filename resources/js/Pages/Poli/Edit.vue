@@ -2,14 +2,18 @@
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 
+const props = defineProps({
+    polis: Object,
+});
+
 const form = useForm({
-    nama: "",
-    prefix: "",
-    status: true,
+    nama: props.polis.nama,
+    prefix: props.polis.prefix,
+    status: props.polis.status,
 });
 
 const submit = () => {
-    form.post(route("polis.store"));
+    form.put(route("polis.update", props.polis.id));
 };
 </script>
 
@@ -119,7 +123,7 @@ const submit = () => {
                         :disabled="form.processing"
                         class="px-6 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
                     >
-                        {{ form.processing ? "Menyimpan..." : "Simpan Poli" }}
+                        {{ form.processing ? "Update..." : "Update Poli" }}
                     </button>
                 </div>
             </form>
