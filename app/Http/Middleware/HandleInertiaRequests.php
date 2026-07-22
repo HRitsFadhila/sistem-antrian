@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => session('success'),
                 'error' => fn () => session('error'),
+                'no_antrian' => fn () => session('no_antrian'),
             ],
         ];
     }
