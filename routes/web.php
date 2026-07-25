@@ -17,22 +17,27 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/layar-tv', function () {
+    return Inertia::render('Antrian/LayarTV');
+});
+
+Route::get('/api/layar-antrian', [AntrianController::class, 'layarAntrian']);
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
-
 });
 
 Route::middleware('auth', 'role:admin')->group(function (){
     Route::resource('users', UserController::class);
     Route::resource('polis', PoliController::class);
     Route::resource('antrian', AntrianController::class);
+
+    Route::get('/dashboard', [AntrianController::class, 'dashboard'])->name('dashboard');
+    Route::post('/panggil-antrian', [AntrianController::class, 'panggilAntrian'])->name('antrian.panggil');
+    Route::post('/antrian-berikutnya', [AntrianController::class, 'AntrianController@antrianBerikutnya']);
 });
 
 require __DIR__.'/auth.php';

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('poli_id')->constrained('polis')->onDelete('cascade');
             $table->string('no_antrian', 10);
             $table->integer('angka_antrian');
-            $table->enum('status', ['menunggu', 'sedang_dipanggil', 'selesai', 'dilewati'])->default('menunggu');
+            $table->enum('status', ['menunggu', 'dipanggil', 'dilewati', 'selesai'])->default('menunggu');
             $table->date('tanggal');
             $table->timestamps();
         });
