@@ -216,21 +216,15 @@ class AntrianController extends Controller
         $poli = Poli::findOrFail($request->poli_id);
         $loketTujuan = $request->input('loket', $poli->nama);
 
-        // 1. Ubah status antrian yang "dipanggil" sebelumnya menjadi "selesai"
-        // Ini mengasumsikan pasien sebelumnya sudah selesai dilayani
-        Antrian::where('poli_id', $request->poli_id)
-            ->whereDate('tanggal', $hariIni)
-            ->where('status', 'dipanggil')
-            ->update(['status' => 'selesai']);
-
-        // 2. Cari nomor antrian berikutnya yang masih berstatus "menunggu"
+        // 1. CARI DULU nomor antrian berikutnya yang masih berstatus "menunggu"
         $antrianBaru = Antrian::where('poli_id', $request->poli_id)
                             ->whereDate('tanggal', $hariIni)
                             ->where('status', 'menunggu')
-                            ->orderBy('angka_antrian', 'asc') // Urutkan dari yang terkecil/terlama
+                            ->orderBy('angka_antrian', 'asc')
                             ->first();
 
-        // Jika antrian baru tidak ditemukan (habis)
+        // 2. CEK: Jika antrian baru tidak ditemukan (habis)
+        // BATALKAN PROSES. Jangan ubah status pasien saat ini agar tetap bisa di-Panggil Ulang.
         if (!$antrianBaru) {
             return response()->json([
                 'success' => false,
@@ -238,13 +232,19 @@ class AntrianController extends Controller
             ], 404);
         }
 
-        // 3. Ubah status antrian baru tersebut menjadi "dipanggil"
+        // 3. Jika antrian baru ADA, barulah pasien yang lama kita ubah menjadi "selesai"
+        Antrian::where('poli_id', $request->poli_id)
+            ->whereDate('tanggal', $hariIni)
+            ->where('status', 'dipanggil')
+            ->update(['status' => 'selesai']);
+
+        // 4. Ubah status antrian baru tersebut menjadi "dipanggil"
         $antrianBaru->update(['status' => 'dipanggil']);
 
-        // 4. Broadcast event agar TV/Speaker memanggil nomor ini
+        // 5. Broadcast event agar TV/Speaker memanggil nomor ini
         broadcast(new PanggilanAntrian($antrianBaru->no_antrian, $loketTujuan, $poli->id));
 
-        // 5. Kembalikan respon ke Vue (Sangat penting menyertakan 'nomor_antrian' agar tidak blank)
+        // 6. Kembalikan respon ke Vue
         return response()->json([
             'success' => true,
             'message' => 'Memanggil antrian selanjutnya: ' . $antrianBaru->no_antrian,
@@ -252,16 +252,16 @@ class AntrianController extends Controller
         ]);
     }
 
-
-
-    public function layarAntrian()
+public function layarAntrian()
 {
     $hariIni = now()->toDateString();
 
+    // 1. Ambil data untuk kotak-kotak kecil di bawah (Daftar Poli)
     $polis = \App\Models\Poli::where('status', true)->get()->map(function ($poli) use ($hariIni) {
+        // Asumsi status antrian Anda: 'menunggu', 'dipanggil', 'selesai', 'dilewati'
         $antrianTerkini = \App\Models\Antrian::where('poli_id', $poli->id)
             ->whereDate('tanggal', $hariIni)
-            ->whereIn('status', ['sedang_dipanggil', 'selesai', 'dilewati'])
+            ->whereIn('status', ['dipanggil', 'selesai'])
             ->orderBy('updated_at', 'desc')
             ->first();
 
@@ -272,7 +272,26 @@ class AntrianController extends Controller
         ];
     });
 
-    return response()->json($polis);
+    // 2. Ambil 1 antrian terakhir SATU KLINIK untuk ditampilkan di kotak BESAR (Sebelah Video)
+    $antrianBesar = \App\Models\Antrian::whereDate('tanggal', $hariIni)
+        ->where('status', 'dipanggil')
+        ->orderBy('updated_at', 'desc')
+        ->first();
+
+    $loketBesar = 'MENUNGGU PANGGILAN';
+    if ($antrianBesar) {
+        $poliBesar = \App\Models\Poli::find($antrianBesar->poli_id);
+        $loketBesar = $poliBesar ? $poliBesar->nama : 'LOKET';
+    }
+
+    // Kembalikan dalam bentuk JSON
+    return response()->json([
+        'polis' => $polis,
+        'aktif' => [
+            'nomor' => $antrianBesar ? $antrianBesar->no_antrian : '---',
+            'loket' => $loketBesar
+        ]
+    ]);
 }
 
     /**

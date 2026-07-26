@@ -33,14 +33,17 @@
 
         <main class="flex-1 grid grid-cols-12 gap-4 p-4">
             <div class="col-span-4 flex flex-col gap-4">
-                <div class="bg-indigo-500 text-white rounded-lg shadow-lg flex-1 flex flex-col overflow-hidden border-4 border-indigo-400">
-                    <div class="bg-indigo-600/50 py-3 text-center border-b border-indigo-400">
+                <div :class="[
+                    'text-white rounded-lg shadow-lg flex-1 flex flex-col overflow-hidden border-4 transition-colors duration-300',
+                    isMemanggil ? 'bg-red-500 border-red-400 animate-pulse' : 'bg-indigo-500 border-indigo-400'
+                ]">
+                    <div :class="['py-3 text-center border-b transition-colors', isMemanggil ? 'bg-red-600/50 border-red-400' : 'bg-indigo-600/50 border-indigo-400']">
                         <h2 class="text-2xl font-bold tracking-widest uppercase">Nomor Antrian</h2>
                     </div>
                     <div class="flex-1 flex items-center justify-center">
                         <span class="text-9xl font-bold drop-shadow-md font-mono">{{ antrianAktif.nomor }}</span>
                     </div>
-                    <div class="bg-indigo-600/50 py-4 text-center border-t border-indigo-400">
+                    <div :class="['py-4 text-center border-t transition-colors', isMemanggil ? 'bg-red-600/50 border-red-400' : 'bg-indigo-600/50 border-indigo-400']">
                         <h3 class="text-xl font-semibold uppercase tracking-widest">{{ antrianAktif.loket }}</h3>
                     </div>
                 </div>
@@ -85,7 +88,8 @@ import axios from 'axios';
 // ==========================================
 // 1. STATE & DATA INITIALIZATION
 // ==========================================
-const audioAktif = ref(false); // State untuk overlay keamanan autoplay browser
+const audioAktif = ref(false);
+const isMemanggil = ref(false); // State untuk animasi berkedip merah
 
 const antrianAktif = ref({
     nomor: '---',
@@ -99,35 +103,41 @@ const daftarWarna = [
     'bg-blue-500', 'bg-orange-500', 'bg-teal-500'
 ];
 
-// Fungsi untuk bypass Autoplay Policy Browser
 const aktifkanAudio = () => {
     audioAktif.value = true;
-    // Pancingan audio agar browser memberikan izin Web Speech API
     const testSpeech = new SpeechSynthesisUtterance('');
     window.speechSynthesis.speak(testSpeech);
 };
 
-// Fungsi untuk mengambil data dari Laravel
+// ==========================================
+// 2. FETCH DATA DARI CONTROLLER LARAVEL
+// ==========================================
 const fetchDaftarPoli = async () => {
     try {
         const response = await axios.get('/api/layar-antrian');
+        const data = response.data; // Mengambil JSON dari format baru Laravel
 
-        // Pastikan kita mendapat array, terlepas dari format JSON yang dikembalikan Laravel
-        const rawData = Array.isArray(response.data) ? response.data : (response.data.data || []);
+        // Set Kotak Utama Sebelah Video
+        if (data.aktif) {
+            antrianAktif.value.nomor = data.aktif.nomor;
+            antrianAktif.value.loket = data.aktif.loket;
+        }
 
-        daftarPoli.value = rawData.map((poli, index) => ({
-            ...poli,
-            // Fallback nama properti jika berbeda dari backend
-            nomorTerkini: poli.nomorTerkini || poli.nomor_terkini || '-',
-            color: daftarWarna[index % daftarWarna.length]
-        }));
+        // Set Kotak Kecil Daftar Poli
+        if (data.polis) {
+            daftarPoli.value = data.polis.map((poli, index) => ({
+                ...poli,
+                nomorTerkini: poli.nomorTerkini || '-',
+                color: daftarWarna[index % daftarWarna.length]
+            }));
+        }
     } catch (error) {
-        console.error("Gagal mengambil data poli:", error);
+        console.error("Gagal mengambil data antrian:", error);
     }
 };
 
 // ==========================================
-// 2. LOGIKA VIDEO YOUTUBE RANDOM
+// 3. LOGIKA VIDEO YOUTUBE RANDOM
 // ==========================================
 const videoUrl = ref('');
 const kumpulanVideoYoutube = ['5qap5aO4i9A', 'jfKfPfyJRdk', 'kJQP7kiw5Fk'];
@@ -139,7 +149,7 @@ const setRandomVideo = () => {
 };
 
 // ==========================================
-// 3. LOGIKA JAM & TANGGAL REALTIME
+// 4. LOGIKA JAM & TANGGAL REALTIME
 // ==========================================
 const waktuSekarang = ref('');
 const tanggalSekarang = ref('');
@@ -154,33 +164,35 @@ const updateJam = () => {
 };
 
 // ==========================================
-// 4. LOGIKA SUARA (TEXT-TO-SPEECH)
+// 5. LOGIKA SUARA (TEXT-TO-SPEECH)
 // ==========================================
 const panggilSuara = (nomor, loket) => {
-    // Memecah teks nomor agar dibaca per huruf/angka (Contoh: "A001" -> "A 0 0 1")
     const nomorDieja = nomor.split('').join(' ');
-
-    const teksPanggilan = `Nomor antrian, ${nomorDieja}, silakan menuju, ${loket}`;
-
+    const teksPanggilan = `Nomor antrian, ${nomorDieja}, silakan menuju, poli ${loket}`;
     const speech = new SpeechSynthesisUtterance(teksPanggilan);
     speech.lang = 'id-ID';
     speech.rate = 0.8;
     speech.pitch = 1.0;
-
     window.speechSynthesis.speak(speech);
 };
 
 // ==========================================
-// 5. LOGIKA WEBSOCKET (LARAVEL ECHO / REVERB)
+// 6. LOGIKA WEBSOCKET (LARAVEL ECHO / REVERB)
 // ==========================================
 const setupWebSocket = () => {
     window.Echo.channel('antrian-channel')
         .listen('.panggilan.baru', (e) => {
             console.log("Panggilan masuk via WS:", e);
 
-            // Update Kotak Utama
+            // Aktifkan animasi kedip merah selama 4 detik
+            isMemanggil.value = true;
+            setTimeout(() => {
+                isMemanggil.value = false;
+            }, 4000);
+
+            // Update Kotak Utama (Sebelah Video)
             antrianAktif.value.nomor = e.nomorAntrian;
-            antrianAktif.value.loket = e.loket;
+            antrianAktif.value.loket = e.namaPoli;
 
             // Update Kotak Kecil Daftar Poli
             const poliIndex = daftarPoli.value.findIndex(p => p.id === e.poli_id);
@@ -189,7 +201,7 @@ const setupWebSocket = () => {
             }
 
             // Putar Suara
-            panggilSuara(e.nomorAntrian, e.loket);
+            panggilSuara(e.nomorAntrian, e.namaPoli);
         });
 };
 
@@ -211,7 +223,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Agar angka lebih rapi dan sama lebarnya */
 .font-mono {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

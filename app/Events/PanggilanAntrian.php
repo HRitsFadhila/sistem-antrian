@@ -4,39 +4,31 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+// PASTIKAN BARIS DI BAWAH INI MENGGUNAKAN ShouldBroadcastNow
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PanggilanAntrian
+// UBAH JUGA DI SINI MENJADI ShouldBroadcastNow
+class PanggilanAntrian implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
     public $nomorAntrian;
     public $namaPoli;
     public $poli_id;
 
-    public function __construct($nomorAntrian, $poli_id, $namaPoli)
+    public function __construct($nomorAntrian, $namaPoli, $poli_id)
     {
         $this->nomorAntrian = $nomorAntrian;
-        $this->poli_id = $poli_id;
         $this->namaPoli = $namaPoli;
+        $this->poli_id = $poli_id;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
-     */
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('antrian-channel'),
+            new Channel('antrian-channel'),
         ];
     }
 
