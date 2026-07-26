@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-import axios from 'axios'; // Jika butuh request langsung via axios
+import axios from 'axios';
 
 // 1. Terima data dari Laravel Controller via Props Inertia
 const props = defineProps({
@@ -12,23 +12,19 @@ const props = defineProps({
 });
 
 // 2. Buat reaktif copy dari props agar bisa ter-update otomatis dari WebSocket
-const daftarPoliLokal = ref([...props.daftarPoli]);
+const daftarPoliLokal = ref(props.daftarPoli.map(p => ({
+    ...p,
+    daftarDilewati: p.daftarDilewati || []
+})));
 
 const loading = ref(false);
 
-// Logika Fungsi Panggil
+// Logika Fungsi Panggil (Re-call)
 const panggilAntrian = async (poliId, namaPoli) => {
     loading.value = true;
     try {
-        const response = await axios.post('/panggil-antrian', { poli_id: poliId });
-
-        const index = daftarPoliLokal.value.findIndex(p => p.id === poliId);
-
-        if (index !== -1) {
-            // PERBAIKAN DI SINI: Akses ke response.data.data.no_antrian
-            daftarPoliLokal.value[index].nomorTerkini = response.data.data.no_antrian;
-        }
-
+        await axios.post('/panggil-antrian', { poli_id: poliId });
+        console.log(`Memanggil ulang antrian di ${namaPoli}`);
     } catch (error) {
         alert(error.response?.data?.message || 'Gagal memanggil antrian.');
         console.error(error);
@@ -37,18 +33,16 @@ const panggilAntrian = async (poliId, namaPoli) => {
     }
 };
 
+// Logika Fungsi Berikutnya (Next)
 const antrianBerikutnya = async (poliId, namaPoli) => {
     loading.value = true;
     try {
         const response = await axios.post('/antrian-berikutnya', { poli_id: poliId });
-
         const index = daftarPoliLokal.value.findIndex(p => p.id === poliId);
 
         if (index !== -1) {
-            // PERBAIKAN DI SINI: Akses ke response.data.data.no_antrian
-            daftarPoliLokal.value[index].nomorTerkini = response.data.no_antrian;
+            daftarPoliLokal.value[index].nomorTerkini = response.data.nomor_antrian;
         }
-
     } catch (error) {
         alert(error.response?.data?.message || 'Gagal memproses antrian berikutnya.');
         console.error(error);
@@ -57,17 +51,52 @@ const antrianBerikutnya = async (poliId, namaPoli) => {
     }
 };
 
-// Logika Fungsi Lewati
+// Logika Fungsi Lewati (Memindahkan nomor aktif ke daftar dilewati)
 const lewatiAntrian = async (poliId, namaPoli) => {
     loading.value = true;
     try {
-        // Uncomment baris di bawah ini dan sesuaikan endpoint-nya nanti
-        await axios.post('/api/lewati-antrian', { poli_id: poliId });
+        const response = await axios.post('/lewati-antrian', { poli_id: poliId });
+        const index = daftarPoliLokal.value.findIndex(p => p.id === poliId);
 
-        alert(`Melewati antrian saat ini di ${namaPoli}.`);
+        if (index !== -1) {
+            const nomorDilewati = response.data.nomor_antrian;
+
+            // Masukkan nomor ke daftarDilewati di Vue agar langsung TAMPIL
+            if (nomorDilewati && !daftarPoliLokal.value[index].daftarDilewati.includes(nomorDilewati)) {
+                daftarPoliLokal.value[index].daftarDilewati.push(nomorDilewati);
+            }
+
+            // Kosongkan layar utama
+            daftarPoliLokal.value[index].nomorTerkini = '-';
+        }
     } catch (error) {
-        alert('Gagal melewati antrian.');
-        console.error(error);
+        alert(error.response?.data?.message || 'Gagal melewati antrian.');
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Logika Fungsi Panggil Kembali (Memanggil dari daftar dilewati)
+const panggilDilewati = async (poliId, nomorAntrian) => {
+    loading.value = true;
+    try {
+        const response = await axios.post('/panggil-dilewati', {
+            poli_id: poliId,
+            nomor_antrian: nomorAntrian
+        });
+
+        const index = daftarPoliLokal.value.findIndex(p => p.id === poliId);
+        if (index !== -1) {
+            // Tampilkan kembali nomor tersebut di layar utama
+            daftarPoliLokal.value[index].nomorTerkini = response.data.nomor_antrian;
+
+            // Hapus nomor tersebut dari daftar dilewati
+            daftarPoliLokal.value[index].daftarDilewati = daftarPoliLokal.value[index].daftarDilewati.filter(
+                n => n !== nomorAntrian
+            );
+        }
+    } catch (error) {
+        alert(error.response?.data?.message || 'Gagal memanggil antrian terlewat.');
     } finally {
         loading.value = false;
     }
@@ -115,7 +144,6 @@ onUnmounted(() => {
                 </div>
 
                 <div class="p-4 bg-white border-t border-gray-100 grid grid-cols-3 gap-3">
-
                     <button
                         @click="lewatiAntrian(poli.id, poli.nama)"
                         :disabled="loading"
@@ -139,10 +167,33 @@ onUnmounted(() => {
                     >
                         Berikutnya
                     </button>
-
                 </div>
-            </div>
 
+                <div
+                    v-if="poli.daftarDilewati && poli.daftarDilewati.length > 0"
+                    class="p-4 bg-red-50 border-t border-red-100"
+                >
+                    <p class="text-xs font-bold text-red-600 mb-2 uppercase">Antrian Dilewati:</p>
+
+                    <div class="flex flex-col gap-2">
+                        <div
+                            v-for="nomor in poli.daftarDilewati"
+                            :key="nomor"
+                            class="flex items-center justify-between bg-white border border-red-200 px-3 py-2 rounded-lg shadow-sm"
+                        >
+                            <span class="font-bold font-mono text-gray-800">{{ nomor }}</span>
+                            <button
+                                @click="panggilDilewati(poli.id, nomor)"
+                                :disabled="loading"
+                                class="text-xs bg-red-500 hover:bg-red-600 text-white font-bold px-3 py-1.5 rounded-md transition disabled:opacity-50"
+                            >
+                                Panggil Ulang
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </AdminLayout>
 </template>

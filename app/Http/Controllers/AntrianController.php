@@ -27,22 +27,28 @@ class AntrianController extends Controller
     {
         $hariIni = now()->toDateString();
 
-        $polis = Poli::where('status', true)->get()->map(function ($poli) use ($hariIni) {
-            $antrianTerkini = Antrian::where('poli_id', $poli->id)
+        $daftarPoli = Poli::all()->map(function ($poli) use ($hariIni) {
+            $antrianAktif = Antrian::where('poli_id', $poli->id)
                 ->whereDate('tanggal', $hariIni)
-                ->whereIn('status', ['sedang_dipanggil', 'selesai', 'dilewati'])
-                ->orderBy('updated_at', 'desc')
+                ->where('status', 'dipanggil')
                 ->first();
+
+            $antrianDilewati = Antrian::where('poli_id', $poli->id)
+                ->whereDate('tanggal', $hariIni)
+                ->where('status', 'dilewati')
+                ->pluck('no_antrian')
+                ->toArray();
 
             return [
                 'id' => $poli->id,
                 'nama' => $poli->nama,
-                'nomorTerkini' => $antrianTerkini ? $antrianTerkini->no_antrian : '-'
+                'nomorTerkini' => $antrianAktif ? $antrianAktif->no_antrian : '-',
+                'daftarDilewati' => $antrianDilewati,
             ];
         });
 
         return Inertia::render('Dashboard', [
-            'daftarPoli' => $polis
+            'daftarPoli' => $daftarPoli
         ]);
     }
 
@@ -146,7 +152,8 @@ class AntrianController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Antrian ' . $antrianSaatIni->no_antrian . ' berhasil dilewati.'
+                'message' => 'Antrian ' . $antrianSaatIni->no_antrian . ' berhasil dilewati.',
+                'nomor_antrian' => $antrianSaatIni->no_antrian
             ]);
         }
 
@@ -156,6 +163,49 @@ class AntrianController extends Controller
         ], 404);
     }
 
+    public function panggilDilewati(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'poli_id' => 'required|exists:polis,id',
+            'nomor_antrian' => 'required'
+        ]);
+
+        $hariIni = now()->toDateString();
+        $poli = Poli::findOrFail($request->poli_id);
+        $loketTujuan = $request->input('loket', $poli->nama);
+
+        // 1. Selesaikan antrian yang mungkin sedang aktif di dalam ruangan saat ini
+        Antrian::where('poli_id', $request->poli_id)
+            ->whereDate('tanggal', $hariIni)
+            ->where('status', 'dipanggil')
+            ->update(['status' => 'selesai']);
+
+        // 2. Cari antrian dilewati berdasarkan nomornya
+        $antrianPending = Antrian::where('poli_id', $request->poli_id)
+                                ->whereDate('tanggal', $hariIni)
+                                ->where('no_antrian', $request->nomor_antrian)
+                                ->where('status', 'dilewati')
+                                ->first();
+
+        if (!$antrianPending) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data antrian tidak ditemukan di database.'
+            ], 404);
+        }
+
+        // 3. Ubah statusnya kembali jadi dipanggil
+        $antrianPending->update(['status' => 'dipanggil']);
+
+        // 4. Bunyikan layar TV / Speaker (Pastikan class PanggilanAntrian sudah di-import di atas)
+        broadcast(new PanggilanAntrian($antrianPending->no_antrian, $loketTujuan, $poli->id));
+
+        return response()->json([
+            'success' => true,
+            'nomor_antrian' => $antrianPending->no_antrian
+        ]);
+    }
     public function antrianBerikutnya(Request $request)
     {
         $request->validate([
