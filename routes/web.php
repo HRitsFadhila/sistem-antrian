@@ -21,6 +21,8 @@ Route::get('/layar-tv', function () {
     return Inertia::render('Antrian/LayarTV');
 });
 
+Route::resource('antrian', AntrianController::class);
+
 Route::get('/api/layar-antrian', [AntrianController::class, 'layarAntrian']);
 
 
@@ -33,7 +35,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth', 'role:admin')->group(function (){
     Route::resource('users', UserController::class);
     Route::resource('polis', PoliController::class);
-    Route::resource('antrian', AntrianController::class);
+
 
     Route::get('/dashboard', [AntrianController::class, 'dashboard'])->name('dashboard');
     Route::post('/panggil-antrian', [AntrianController::class, 'panggilAntrian']);

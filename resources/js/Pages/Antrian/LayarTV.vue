@@ -173,7 +173,17 @@ const panggilSuara = (nomor, loket) => {
     speech.lang = 'id-ID';
     speech.rate = 0.8;
     speech.pitch = 1.0;
-    window.speechSynthesis.speak(speech);
+
+    const bellSound = new Audio('/audio/announcement.mp3');
+
+    bellSound.play().catch(error => {
+    console.error("Gagal memutar suara bel. Pastikan file ada di public/audio/bell.mp3", error);
+        window.speechSynthesis.speak(speech);
+    });
+
+    bellSound.onended = () => {
+        window.speechSynthesis.speak(speech);
+    };
 };
 
 // ==========================================
