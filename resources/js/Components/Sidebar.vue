@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue"
-import { Link, usePage } from "@inertiajs/vue3";
+import { Link, usePage, router } from "@inertiajs/vue3";
+import Swal from 'sweetalert2'
 import {
   LayoutDashboard,
   Users,
@@ -39,6 +40,26 @@ const menus = [
     icon: Settings,
   },
 ];
+
+const konfirmasiLogout = () => {
+    Swal.fire({
+        title: "Yakin ingin keluar?",
+        text: "Anda harus login kembali untuk mengakses sistem.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc2626", // Warna merah Tailwind (red-600)
+        cancelButtonColor: "#475569", // Warna abu-abu Tailwind (slate-600)
+        confirmButtonText: "Ya, Logout",
+        cancelButtonText: "Batal",
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Gunakan router Inertia untuk menembak rute POST logout
+            // route('logout') berasal dari Ziggy (sama seperti href sebelumnya)
+            router.post(route('logout'));
+        }
+    });
+};
 </script>
 
 
@@ -135,17 +156,13 @@ const menus = [
     </div> -->
      <div class="p-4 border-t border-slate-700">
 
-      <Link
-        :href="route('logout')"
-        method="post"
-        as="button"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition"
+      <button
+        @click="konfirmasiLogout"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-600 transition text-slate-300 hover:text-white"
       >
         <LogOut class="w-5 h-5" />
-
         <span>Logout</span>
-      </Link>
-
+      </button>
     </div>
 </aside>
 
