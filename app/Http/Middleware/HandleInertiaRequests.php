@@ -42,6 +42,10 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => session('error'),
                 'no_antrian' => fn () => session('no_antrian'),
             ],
+
+            'app_settings' => fn () => \Illuminate\Support\Facades\Schema::hasTable('settings')
+                                ? \App\Models\Setting::pluck('value', 'key')->toArray()
+                                : [],
         ];
     }
 }
