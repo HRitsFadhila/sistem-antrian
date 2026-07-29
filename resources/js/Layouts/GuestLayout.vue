@@ -9,7 +9,11 @@ import { Link } from '@inertiajs/vue3';
     >
         <div>
             <Link href="/">
-                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
+                <img
+            :src="$page.props.app_settings.logo_klinik || '/images/default-logo.png'"
+            alt="Logo Klinik"
+            class="w-24 h-24 object-contain mx-auto drop-shadow-sm"
+        />
             </Link>
         </div>
 

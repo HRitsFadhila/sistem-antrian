@@ -36,7 +36,7 @@ const menus = [
   },
   {
     name: "Settings",
-    href: "/settings",
+    href: "/setting",
     icon: Settings,
   },
 ];
@@ -70,11 +70,11 @@ const konfirmasiLogout = () => {
     <!-- Logo -->
     <div class="h-20 flex items-center px-6 border-b border-slate-800">
 
-        <div
-            class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold"
-        >
-            A
-        </div>
+        <img
+            :src="$page.props.app_settings.logo_klinik || '/images/default-logo.png'"
+            alt="Logo"
+            class="h-9 w-auto object-contain"
+        />
 
         <div class="ml-3">
             <h1 class="text-white font-bold text-lg">
@@ -82,7 +82,7 @@ const konfirmasiLogout = () => {
             </h1>
 
             <p class="text-xs text-slate-400">
-                Klinik Management
+                {{$page.props.app_settings.nama_klinik||'Klinik Management'}}
             </p>
         </div>
 

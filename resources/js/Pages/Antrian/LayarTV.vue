@@ -17,12 +17,14 @@
 
         <header class="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md">
             <div class="flex items-center space-x-4">
-                <div class="bg-white p-2 rounded flex items-center justify-center">
-                    <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm0-9a1 1 0 011 1v2h2a1 1 0 110 2h-2v2a1 1 0 11-2 0v-2H7a1 1 0 110-2h2V8a1 1 0 011-1z"></path></svg>
-                </div>
+                <img
+                    :src="$page.props.app_settings?.logo_klinik || '/images/default-logo.png'"
+                    alt="Logo"
+                    class="h-9 w-auto object-contain"
+                />
                 <div>
-                    <h1 class="text-xl font-bold tracking-wider">KLINIK SEHAT SELALU</h1>
-                    <p class="text-xs text-blue-200">Jl. Contoh Alamat No. 123, Kota | Telp: 08123456789</p>
+                    <h1 class="text-xl font-bold tracking-wider">{{ $page.props.app_settings?.nama_klinik || 'KLINIK SEHAT SELALU' }} </h1>
+                    <p class="text-xs text-blue-200">{{ $page.props.app_settings?.alamat }} | Telp: {{ $page.props.app_settings?.telepon }}</p>
                 </div>
             </div>
             <div class="text-right">
@@ -51,9 +53,8 @@
 
             <div class="col-span-8 bg-black rounded-lg shadow-lg overflow-hidden border-4 border-gray-300">
                 <iframe
-                    v-if="videoUrl"
-                    class="w-full h-full"
-                    :src="videoUrl"
+                    class="w-full h-full pointer-events-none"
+                    :src="$page.props.app_settings?.video || 'https://www.youtube.com/embed/M7lc1UVf-VE?autoplay=1&mute=1&loop=1&playlist=M7lc1UVf-VE'"
                     title="YouTube video player"
                     frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -75,7 +76,7 @@
 
         <footer class="bg-blue-600 text-white py-2 overflow-hidden shadow-inner">
             <marquee class="text-sm font-semibold tracking-wide">
-                JAM BUKA LAYANAN KAMI ADALAH PUKUL 07:00 S.D 21:00. TERIMA KASIH ATAS KUNJUNGAN ANDA. KAMI SENANTIASA MELAYANI SEPENUH HATI.
+                {{ $page.props.app_settings?.running_text || 'JAM BUKA LAYANAN KAMI ADALAH PUKUL 07:00 S.D 21:00. TERIMA KASIH ATAS KUNJUNGAN ANDA.' }}
             </marquee>
         </footer>
     </div>
@@ -89,7 +90,7 @@ import axios from 'axios';
 // 1. STATE & DATA INITIALIZATION
 // ==========================================
 const audioAktif = ref(false);
-const isMemanggil = ref(false); // State untuk animasi berkedip merah
+const isMemanggil = ref(false);
 
 const antrianAktif = ref({
     nomor: '---',
@@ -115,15 +116,13 @@ const aktifkanAudio = () => {
 const fetchDaftarPoli = async () => {
     try {
         const response = await axios.get('/api/layar-antrian');
-        const data = response.data; // Mengambil JSON dari format baru Laravel
+        const data = response.data;
 
-        // Set Kotak Utama Sebelah Video
         if (data.aktif) {
             antrianAktif.value.nomor = data.aktif.nomor;
             antrianAktif.value.loket = data.aktif.loket;
         }
 
-        // Set Kotak Kecil Daftar Poli
         if (data.polis) {
             daftarPoli.value = data.polis.map((poli, index) => ({
                 ...poli,
@@ -137,19 +136,7 @@ const fetchDaftarPoli = async () => {
 };
 
 // ==========================================
-// 3. LOGIKA VIDEO YOUTUBE RANDOM
-// ==========================================
-const videoUrl = ref('');
-const kumpulanVideoYoutube = ['5qap5aO4i9A', 'jfKfPfyJRdk', 'kJQP7kiw5Fk'];
-
-const setRandomVideo = () => {
-    const randomIndex = Math.floor(Math.random() * kumpulanVideoYoutube.length);
-    const videoId = kumpulanVideoYoutube[randomIndex];
-    videoUrl.value = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0`;
-};
-
-// ==========================================
-// 4. LOGIKA JAM & TANGGAL REALTIME
+// 3. LOGIKA JAM & TANGGAL REALTIME
 // ==========================================
 const waktuSekarang = ref('');
 const tanggalSekarang = ref('');
@@ -164,7 +151,7 @@ const updateJam = () => {
 };
 
 // ==========================================
-// 5. LOGIKA SUARA (TEXT-TO-SPEECH)
+// 4. LOGIKA SUARA (TEXT-TO-SPEECH)
 // ==========================================
 const panggilSuara = (nomor, loket) => {
     const nomorDieja = nomor.split('').join(' ');
@@ -177,7 +164,7 @@ const panggilSuara = (nomor, loket) => {
     const bellSound = new Audio('/audio/announcement.mp3');
 
     bellSound.play().catch(error => {
-    console.error("Gagal memutar suara bel. Pastikan file ada di public/audio/bell.mp3", error);
+        console.error("Gagal memutar suara bel.", error);
         window.speechSynthesis.speak(speech);
     });
 
@@ -187,30 +174,26 @@ const panggilSuara = (nomor, loket) => {
 };
 
 // ==========================================
-// 6. LOGIKA WEBSOCKET (LARAVEL ECHO / REVERB)
+// 5. LOGIKA WEBSOCKET (LARAVEL ECHO / REVERB)
 // ==========================================
 const setupWebSocket = () => {
     window.Echo.channel('antrian-channel')
         .listen('.panggilan.baru', (e) => {
             console.log("Panggilan masuk via WS:", e);
 
-            // Aktifkan animasi kedip merah selama 4 detik
             isMemanggil.value = true;
             setTimeout(() => {
                 isMemanggil.value = false;
             }, 4000);
 
-            // Update Kotak Utama (Sebelah Video)
             antrianAktif.value.nomor = e.nomorAntrian;
             antrianAktif.value.loket = e.namaPoli;
 
-            // Update Kotak Kecil Daftar Poli
             const poliIndex = daftarPoli.value.findIndex(p => p.id === e.poli_id);
             if (poliIndex !== -1) {
                 daftarPoli.value[poliIndex].nomorTerkini = e.nomorAntrian;
             }
 
-            // Putar Suara
             panggilSuara(e.nomorAntrian, e.namaPoli);
         });
 };
@@ -220,7 +203,6 @@ const setupWebSocket = () => {
 // ==========================================
 onMounted(() => {
     fetchDaftarPoli();
-    setRandomVideo();
     updateJam();
     timerInterval = setInterval(updateJam, 1000);
     setupWebSocket();

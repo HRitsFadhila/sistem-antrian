@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AntrianController;
 use App\Http\Controllers\PoliController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -28,6 +29,9 @@ Route::middleware('auth', 'role:admin')->group(function (){
     Route::post('/antrian-berikutnya', [AntrianController::class, 'antrianBerikutnya']);
     Route::post('/lewati-antrian', [AntrianController::class, 'lewatiAntrian']);
     Route::post('/panggil-dilewati', [AntrianController::class, 'panggilDilewati']);
+
+    Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 });
 
 require __DIR__.'/auth.php';
