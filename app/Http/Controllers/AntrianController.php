@@ -39,11 +39,17 @@ class AntrianController extends Controller
                 ->pluck('no_antrian')
                 ->toArray();
 
+            $sisaAntrean = Antrian::where('poli_id', $poli->id)
+                ->whereDate('tanggal', $hariIni)
+                ->where('status', 'menunggu')
+                ->count();
+
             return [
                 'id' => $poli->id,
                 'nama' => $poli->nama,
                 'nomorTerkini' => $antrianAktif ? $antrianAktif->no_antrian : '-',
                 'daftarDilewati' => $antrianDilewati,
+                'sisaAntrean' => $sisaAntrean,
             ];
         });
 

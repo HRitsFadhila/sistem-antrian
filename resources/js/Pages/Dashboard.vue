@@ -1,7 +1,10 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import axios from 'axios';
+import { router } from '@inertiajs/vue3';
+
+let pollingInterval = null;
 
 // 1. Terima data dari Laravel Controller via Props Inertia
 const props = defineProps({
@@ -10,6 +13,10 @@ const props = defineProps({
         default: () => []
     }
 });
+
+watch(() => props.daftarPoli, (newData) => {
+    daftarPoliLokal.value = newData;
+}, { deep: true });
 
 // 2. Buat reaktif copy dari props agar bisa ter-update otomatis dari WebSocket
 const daftarPoliLokal = ref(props.daftarPoli.map(p => ({
@@ -43,6 +50,7 @@ const antrianBerikutnya = async (poliId, namaPoli) => {
         if (index !== -1) {
             daftarPoliLokal.value[index].nomorTerkini = response.data.nomor_antrian;
         }
+        router.reload({ only: ['daftarPoli'] });
     } catch (error) {
         alert(error.response?.data?.message || 'Gagal memproses antrian berikutnya.');
         console.error(error);
@@ -69,6 +77,7 @@ const lewatiAntrian = async (poliId, namaPoli) => {
             // Kosongkan layar utama
             daftarPoliLokal.value[index].nomorTerkini = '-';
         }
+        router.reload({ only: ['daftarPoli'] });
     } catch (error) {
         alert(error.response?.data?.message || 'Gagal melewati antrian.');
     } finally {
@@ -95,6 +104,7 @@ const panggilDilewati = async (poliId, nomorAntrian) => {
                 n => n !== nomorAntrian
             );
         }
+        router.reload({ only: ['daftarPoli'] });
     } catch (error) {
         alert(error.response?.data?.message || 'Gagal memanggil antrian terlewat.');
     } finally {
@@ -110,10 +120,21 @@ onMounted(() => {
                 daftarPoliLokal.value[index].nomorTerkini = e.nomorAntrian;
             }
         });
+    pollingInterval = setInterval(() => {
+        router.reload({
+            only: ['daftarPoli'], // Hanya mengambil array daftarPoli
+            preserveState: true,  // Menjaga agar state/loading tidak reset
+            preserveScroll: true  // Menjaga agar halaman tidak tergulir ke atas
+        });
+    }, 5000);
 });
 
 onUnmounted(() => {
     window.Echo.leave('antrian-channel');
+
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
 });
 </script>
 
@@ -140,6 +161,13 @@ onUnmounted(() => {
                     <p class="text-sm text-gray-400 font-semibold mb-2 uppercase tracking-wider">Antrian Saat Ini</p>
                     <span class="text-5xl font-extrabold text-gray-800 font-mono drop-shadow-sm">
                         {{ poli.nomorTerkini }}
+                    </span>
+                </div>
+
+                <div class="px-5 py-3 bg-white border-t border-gray-100 flex justify-between items-center">
+                    <span class="text-sm font-bold text-gray-500 uppercase tracking-wider">Sisa Antrean</span>
+                    <span class="bg-orange-100 text-orange-600 py-1 px-3 rounded-lg text-sm font-extrabold">
+                        {{ poli.sisaAntrean }} Orang
                     </span>
                 </div>
 
