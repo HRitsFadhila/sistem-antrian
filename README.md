@@ -1,58 +1,237 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏥 Integrated Queue Management System (Clinic & Hospital)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js**. This application is designed to provide a seamless and efficient patient queue experience through **real-time updates**, **automatic voice announcements (Text-to-Speech)**, an **interactive TV display**, and a **dynamic staff dashboard**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+# ✨ Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 📺 Real-Time TV Display
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* Displays the currently called queue number in real time using **WebSocket (Laravel Reverb & Laravel Echo)**.
+* Supports **YouTube embedded videos** for educational content or promotional media.
+* Includes a customizable **running text (marquee)** for announcements or important information.
 
-## Learning Laravel
+### 🔊 Automatic Voice Calling (Text-to-Speech)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* Automatically announces queue numbers using the browser's built-in **Text-to-Speech (TTS)** technology.
+* Clear and responsive voice notifications for patients.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 👨‍⚕️ Staff Dashboard
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+* Real-time queue monitoring.
+* Call the next patient.
+* Recall the current queue number.
+* Skip unavailable patients.
+* Display the remaining number of waiting patients.
 
-## Agentic Development
+### ⚙️ Dynamic System Settings
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Administrators can configure the application directly from the dashboard without modifying the source code.
+
+Configurable settings include:
+
+* Clinic/Hospital Name
+* Logo
+* Running Text
+* Educational Video URL (YouTube)
+* Other general system information
+
+### 📱 Responsive User Interface
+
+* Modern and clean UI built with **Tailwind CSS**.
+* Fully responsive for desktop, tablet, and mobile devices.
+
+---
+
+# 🛠️ Technology Stack
+
+| Layer      | Technology                    |
+| ---------- | ----------------------------- |
+| Backend    | Laravel 11                    |
+| Frontend   | Vue.js 3 (Composition API)    |
+| SPA Bridge | Inertia.js                    |
+| Styling    | Tailwind CSS                  |
+| Real-Time  | Laravel Reverb + Laravel Echo |
+| Icons      | Lucide Icons                  |
+| Alerts     | SweetAlert2                   |
+| Database   | MySQL / PostgreSQL            |
+
+---
+
+# 🚀 System Requirements
+
+Before running this project, make sure your environment has the following installed:
+
+* PHP **8.2** or later
+* Composer
+* Node.js & npm
+* MySQL or PostgreSQL
+* Git
+
+---
+
+# 📦 Installation
+
+Clone the repository:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/HRitsFadhila/sistem-antrian.git
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Go to the project directory:
 
-## Contributing
+```bash
+cd queue-management-system
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Install PHP dependencies:
 
-## Code of Conduct
+```bash
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Install JavaScript dependencies:
 
-## Security Vulnerabilities
+```bash
+npm install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Copy the environment file:
 
-## License
+```bash
+cp .env.example .env
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Generate the application key:
+
+```bash
+php artisan key:generate
+```
+
+Configure your database in the `.env` file.
+
+Run the database migrations:
+
+```bash
+php artisan migrate
+```
+
+(Optional) Seed sample data:
+
+```bash
+php artisan db:seed
+```
+
+Build frontend assets:
+
+```bash
+npm run dev
+```
+
+Start the Laravel development server:
+
+```bash
+php artisan serve
+```
+
+---
+
+# 📡 Running the WebSocket Server
+
+Start Laravel Reverb:
+
+```bash
+php artisan reverb:start
+```
+
+If using queue workers:
+
+```bash
+php artisan queue:work
+```
+
+---
+
+# 📂 Project Structure
+
+```
+app/
+bootstrap/
+config/
+database/
+public/
+resources/
+ ├── js/
+ │   ├── Components/
+ │   ├── Layouts/
+ │   ├── Pages/
+ │   └── app.js
+routes/
+storage/
+```
+
+---
+
+# 👥 User Roles
+
+### Administrator
+
+* Manage system settings
+* Manage departments (Polyclinics)
+* Manage users
+* Configure TV display
+* Manage educational videos
+* Monitor queue statistics
+
+### Staff
+
+* Call the next queue number
+* Recall patients
+* Skip queue numbers
+* View remaining queues
+
+### Patient
+
+* Take a queue number
+* Wait for queue announcements
+* Monitor queue status on the TV display
+
+---
+
+# 🔄 Queue Workflow
+
+1. Patient selects a department (polyclinic).
+2. The system generates a queue number.
+3. The queue number appears in the waiting list.
+4. Staff calls the next patient.
+5. The TV display updates instantly through WebSocket.
+6. The system announces the queue number using Text-to-Speech.
+7. The patient proceeds to the designated service counter or examination room.
+
+---
+
+# 📸 Main Modules
+
+* Authentication
+* Dashboard
+* Queue Management
+* Department Management
+* TV Display
+* Queue History
+* User Management
+* System Settings
+
+---
+
+# 📄 License
+
+This project is released under the **MIT License**.
+
+---
+
+# 👨‍💻 Author
+
+**Muhammad Harits Fadhila**
+
+If you find this project helpful, consider giving it a ⭐ on GitHub.
