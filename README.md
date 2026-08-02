@@ -82,7 +82,7 @@ git clone https://github.com/HRitsFadhila/sistem-antrian.git
 Go to the project directory:
 
 ```bash
-cd queue-management-system
+cd sistem-antrian
 ```
 
 Install PHP dependencies:
