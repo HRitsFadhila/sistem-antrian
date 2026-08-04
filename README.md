@@ -33,6 +33,10 @@ A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js
   <img src="https://github.com/user-attachments/assets/7e12628b-9792-4e68-8df7-b8586c96ca47" width="100%" alt="Take Queue">
 </p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4a3052ca-91dd-44f7-889d-49e8fe7fc108" width="100%" alt="Take Queue">
+</p>
+
 > Patients can take queue numbers quickly with an intuitive interface.
 
 ---
@@ -40,17 +44,17 @@ A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js
 ## 📊 Dashboard
 
 <p align="center">
-  <img src="YOUR_DASHBOARD_IMAGE" width="100%" alt="Dashboard">
+  <img src="https://github.com/user-attachments/assets/193e2b39-6085-4a4e-8aa5-988389d10a60" width="100%" alt="Dashboard">
 </p>
 
-> Monitor queue statistics, active counters, and today's service performance in real time.
+> Monitor queue in real time.
 
 ---
 
 ## 👥 User Management
 
 <p align="center">
-  <img src="YOUR_MANAGE_USERS_IMAGE" width="100%" alt="Manage Users">
+  <img src="https://github.com/user-attachments/assets/3c684f1c-9a48-4d5b-ba95-12e24a06fc7b" width="100%" alt="Manage Users">
 </p>
 
 > Manage administrators, staff, and user roles with ease.
@@ -60,7 +64,7 @@ A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js
 ## 🏥 Poli Management
 
 <p align="center">
-  <img src="YOUR_MANAGE_POLI_IMAGE" width="100%" alt="Manage Poli">
+  <img src="https://github.com/user-attachments/assets/8328c169-14f6-42c1-8f5f-950a53844765" width="100%" alt="Manage Poli">
 </p>
 
 > Create and manage departments, queue prefixes, and service configurations.
@@ -70,7 +74,7 @@ A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js
 ## ⚙️ Application Settings
 
 <p align="center">
-  <img src="YOUR_SETTINGS_IMAGE" width="100%" alt="Settings">
+  <img src="https://github.com/user-attachments/assets/a5300aae-4633-4b38-b010-5ac97d8fa589" width="100%" alt="Settings">
 </p>
 
 > Configure system preferences, queue behavior, and application settings.
@@ -80,7 +84,7 @@ A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js
 ## 📺 Realtime Queue Display
 
 <p align="center">
-  <img src="YOUR_DISPLAY_QUEUE_IMAGE" width="100%" alt="Realtime Queue Display">
+  <img src="https://github.com/user-attachments/assets/3517a845-af0f-4fe5-a6ef-058bfac1770f" width="100%" alt="Realtime Queue Display">
 </p>
 
 > Large-screen display showing the current queue, next queue, announcements, and automatic voice calling.
