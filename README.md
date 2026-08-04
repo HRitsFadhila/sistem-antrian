@@ -37,6 +37,57 @@ A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js
 
 ---
 
+## 📊 Dashboard
+
+<p align="center">
+  <img src="YOUR_DASHBOARD_IMAGE" width="100%" alt="Dashboard">
+</p>
+
+> Monitor queue statistics, active counters, and today's service performance in real time.
+
+---
+
+## 👥 User Management
+
+<p align="center">
+  <img src="YOUR_MANAGE_USERS_IMAGE" width="100%" alt="Manage Users">
+</p>
+
+> Manage administrators, staff, and user roles with ease.
+
+---
+
+## 🏥 Poli Management
+
+<p align="center">
+  <img src="YOUR_MANAGE_POLI_IMAGE" width="100%" alt="Manage Poli">
+</p>
+
+> Create and manage departments, queue prefixes, and service configurations.
+
+---
+
+## ⚙️ Application Settings
+
+<p align="center">
+  <img src="YOUR_SETTINGS_IMAGE" width="100%" alt="Settings">
+</p>
+
+> Configure system preferences, queue behavior, and application settings.
+
+---
+
+## 📺 Realtime Queue Display
+
+<p align="center">
+  <img src="YOUR_DISPLAY_QUEUE_IMAGE" width="100%" alt="Realtime Queue Display">
+</p>
+
+> Large-screen display showing the current queue, next queue, announcements, and automatic voice calling.
+
+---
+
+
 # ✨ Features
 
 ### 📺 Real-Time TV Display
