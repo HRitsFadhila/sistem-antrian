@@ -4,6 +4,39 @@ A modern **Queue Management System** built with **Laravel, Vue 3, and Inertia.js
 
 ---
 
+# 📸 Screenshots
+
+<p align="center">
+  <b>Modern Queue Management System</b><br>
+  Built with Laravel, Vue 3, Inertia.js, PostgreSQL, and Tailwind CSS
+</p>
+
+---
+
+## 🔐 Authentication
+
+### Login
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/2881e8fd-6b58-4e66-aa3b-c70ad8651c51" width="100%" alt="Login Page">
+</p>
+
+> Secure authentication for administrators and staff.
+
+---
+
+## 🎟️ Queue Management
+
+### Take Queue
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7e12628b-9792-4e68-8df7-b8586c96ca47" width="100%" alt="Take Queue">
+</p>
+
+> Patients can take queue numbers quickly with an intuitive interface.
+
+---
+
 # ✨ Features
 
 ### 📺 Real-Time TV Display
